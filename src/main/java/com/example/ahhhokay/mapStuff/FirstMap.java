@@ -1,6 +1,7 @@
 package com.example.ahhhokay.mapStuff;
 
 import com.example.ahhhokay.controls.ObjectId;
+import com.example.ahhhokay.models.Block;
 import com.example.ahhhokay.models.Player;
 import com.example.ahhhokay.rendering.Renderer;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class FirstMap implements MapHandler{
     double x = 36;
@@ -33,10 +35,14 @@ public class FirstMap implements MapHandler{
     int tileSize = 16;
     int numRows = mapWidth/tileSize;
     int numCols = mapHeight/tileSize;
+    Block block;
+
+     public static ArrayList<Block> blocks = new ArrayList<>();
 //    private /*Entity*/ Player player = new Player/*Entity*/(new Image(getClass().getResourceAsStream("/img/hutao_uwu.png")), ObjectId.PLAYER);
 
     @Override
     public Group loadMap(String filePath, double sceneWidth,double sceneHeight) {
+
         try {
 //          FOR PARSING THE TMX TURN IT INTO SOMETHING READABLE BY TURNING IT TO A DOCUMENT??
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -68,12 +74,16 @@ public class FirstMap implements MapHandler{
                         double tileX = col*tileSize;
                         double tileY = row*tileSize;
                         Rectangle tile = new Rectangle(tileX, tileY,tileSize,tileSize);
+
                         switch(tileId){
                             case 0:
                                 tile.setFill(Color.BLUE);
                                 break;
                             case 129:
                                 tile.setFill(Color.GREEN);
+
+                                block = new Block(tile,tileX,tileY,tileSize,tileSize);
+                                blocks.add(block);
                                 break;
                             case 146:
                                 tile.setFill(Color.GRAY);
@@ -82,11 +92,7 @@ public class FirstMap implements MapHandler{
                                 tile.setFill(Color.WHITE);
                                 break;
                             case 18:
-//                                tile.setFill(Color.PINK);
-//                                AnchorPane loader = FXMLLoader.load(getClass().getResource("/fxml/MainView.fxml"));
-//
-//                                root.getChildren().add(loader);
-
+//                              PLAYER SPAWNS HERE
                                 break;
                             case 20:
                                 tile.setFill(Color.YELLOW);

@@ -4,7 +4,10 @@ package com.example.ahhhokay.controllers;
 import com.example.ahhhokay.animation.GameLoopTimer;
 import com.example.ahhhokay.controls.KeyInput;
 import com.example.ahhhokay.controls.ObjectId;
+import com.example.ahhhokay.mapStuff.FirstMap;
+import com.example.ahhhokay.models.Block;
 import com.example.ahhhokay.models.Player;
+import com.example.ahhhokay.rendering.CollisionHandler;
 import com.example.ahhhokay.rendering.Renderer;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
@@ -14,7 +17,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
+
+import static com.example.ahhhokay.mapStuff.FirstMap.blocks;
 
 
 public class GameController implements Initializable {
@@ -23,18 +29,23 @@ public class GameController implements Initializable {
     public AnchorPane gameAnchor;
     KeyInput keys = KeyInput.getInstance();
 
-    private /*Entity*/ Player player = new Player/*Entity*/(new Image(getClass().getResourceAsStream("/img/hutao_uwu.png")), ObjectId.PLAYER);
+    private /*Entity*/ Player player = new Player/*Entity*/(new Image(getClass().getResourceAsStream("/img/hutao_uwu.png")),/*0,50,*/ ObjectId.PLAYER);
+    private ArrayList<Block> tiles = FirstMap.blocks;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 //      INITIALIZES THE CANVAS FOR DRAWING THE ENTITIES
         initialiseCanvas();
         System.out.println("aaaaaaa initialized");
-        player.setDrawPosition(350, 200);
-        player.setScale(0.8f);
+        player.setDrawPosition(25, 150);
+        player.setScale(0.5f);
 
         Renderer renderer = new Renderer(this.gameCanvas);
-        renderer.addEntity(player);
+        renderer.addPlayer(player);
+        renderer.addTiles(tiles);
+
+
+
 
 //      ANIMATION TIMER
         GameLoopTimer timer = new GameLoopTimer() {
@@ -45,6 +56,9 @@ public class GameController implements Initializable {
                 updatePlayerMovement(secondsSinceLastFrame);
 
                 renderer.render();
+
+                CollisionHandler colHand = new CollisionHandler(player,tiles);
+                colHand.collision();
             }
         };
         timer.start();
@@ -57,21 +71,38 @@ public class GameController implements Initializable {
 
 
     }
-//  FOR PLAYER MOVEMENT CAN BECOME MORE EFFICIENT PA I THINK IMMA DO IT LATER
+//  TODO:FOR PLAYER MOVEMENT CAN BECOME MORE EFFICIENT PA I THINK IMMA DO IT LATER
+//  DONEEEE I THINK THIS THE MOST EFFICIENT IDK
     private void updatePlayerMovement(float frameDuration) {
+        Point2D newLocation =  Point2D.ZERO;
         if (keys.isDown(KeyCode.D)) {
-            Point2D vector = new Point2D(5,0);
-            player.move(vector);
+            newLocation = newLocation.add(2,0);
+
         } else if (keys.isDown(KeyCode.A)) {
-            Point2D vector = new Point2D(-5,0);
-            player.move(vector);
+            newLocation = newLocation.add(-2,0);
+
         } else if(keys.isDown(KeyCode.W)){
-            Point2D vector = new Point2D(0,-5);
-            player.move(vector);
+            System.out.println("dddd");
+            if( !player.isJumping()) {
+                player.jump();
+                System.out.println("aaa");
+                newLocation = newLocation.add(0,-5);
+                player.setFalling(true);
+            }
+//            player.setJumping(true);
+
+
         } else if(keys.isDown(KeyCode.S)){
-            Point2D vector = new Point2D(0,5);
-            player.move(vector);
+            newLocation = newLocation.add(0,2);
+
         }
+
+        if(player.isFalling()/*&& player.isJumping()*/){
+            Point2D gravity = new Point2D(0,2);
+            newLocation = newLocation.add(gravity);
+//            player.setJumping(true);
+        }
+        player.move(newLocation);
 
         player.update();
     }
